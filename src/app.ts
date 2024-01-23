@@ -1,18 +1,50 @@
 import * as express from "express";
+import catsRouter from "./cats/cats.route";
+import exp from "constants";
 
-const app: express.Express = express();
+class Server {
+  public app: express.Application;
 
-const port: number = 3000;
+  constructor() {
+    const app: express.Application = express();
+    this.app = app;
+  }
 
-app.get("/test", (req: express.Request, res: express.Response) => {
-  console.log(req);
-  res.send({ hello: "world" });
-});
+  private setRoute() {
+    this.app.use(catsRouter);
+  }
 
-app.post("/test", (req, res) => {
-  res.send({ cat: "cheese" });
-});
+  private setMiddleware() {
+    //* logging middleware
+    this.app.use((req, res, next) => {
+      console.log(req.rawHeaders[1]);
+      console.log("this is middleware");
+      next();
+    });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhos:${port}`);
-});
+    //* json middleware
+    this.app.use(express.json());
+
+    this.setRoute();
+
+    //* 404 middleware
+    this.app.use((req, res, next) => {
+      console.log(req.rawHeaders[1]);
+      res.send({ error: "404" });
+    });
+  }
+
+  public listen() {
+    this.setMiddleware();
+    this.app.listen(3000, () => {
+      console.log("server on 3000");
+    });
+  }
+}
+
+function init() {
+  const server = new Server();
+  server.listen;
+}
+
+init();
